@@ -13,7 +13,6 @@ app.listen(port, ()=>console.log(`listening on port ${port}`));
 
 app.get('/', (req, res) => {
     res.send('hello world')
-    res.end()
 })
 
 app.get('/contacts', (req, res) => {
@@ -22,21 +21,17 @@ app.get('/contacts', (req, res) => {
 
 app.get('/contactById/:id', (req, res) => {
     const contact = data.find(c => parseInt(req.params.id) === c.id);
-    if(!contact){
-        res.end('not found')
-    }else{
-        res.end(contact)
-    }
+    
+    if(!contact) return res.status(404).send('contact not found')
+    
+    res.send(contact)
+    
 })
 
 app.post('/new_contact', async (req, res) => {
     const schema = Joi.object({
         full_name: Joi.string().min(3).required()
     }) 
-
-    schema.validate({
-        full_name: req.body.full_name
-    })
 
     try {
         await schema.validateAsync({
@@ -68,7 +63,44 @@ app.post('/new_contact', async (req, res) => {
         
     }
 
+})
+
+app.put('/contactById/:id', async (req, res) => {
+    const contact = data.find(c => parseInt(req.params.id) === c.id);
+    if(!contact) return res.status(404).send('contact not found')
+    
+    try {
+            
+        contact.full_name = req.body.full_name == null ? contact.full_name : req.body.full_name
+        contact.nick_name = req.body.nick_name == null ? contact.nick_name : req.body.nick_name
+        contact.job = req.body.job == null ? contact.job : req.body.job
+        contact.sex = req.body.sex == null ? contact.sex : req.body.sex
+        contact.phone_number = req.body.phone_number == null ? contact.phone_number : req.body.phone_number
+        contact.email = req.body.email == null ? contact.email : req.body.email
+        contact.telegram = req.body.telegram == null ? contact.telegram : req.body.telegram
+        contact.linked_in = req.body.linked_in == null ? contact.linked_in : req.body.linked_in
+        contact.github = req.body.github == null ? contact.github : req.body.github
+        contact.twitter = req.body.twitter == null ? contact.twitter : req.body.twitter
+        contact.Street = req.body.Street == null ? contact.Street : req.body.Street
+        contact.City = req.body.City == null ? contact.City : req.body.City
+        contact.State = req.body.State == null ? contact.State : req.body.State
+        contact.Country = req.body.Country == null ? contact.Country : req.body.Country
+            
+        res.send(contact)
+    } catch (error) {
+        res.status(400).end(error)
+    }
+    
+})
+
+app.delete('/contactById/:id', (req, res) => {
+    const contact = data.find(c => parseInt(req.params.id) === c.id);
+    
+    if(!contact) return res.status(404).send('contact not found')
+    
+    const index = data.indexOf(contact)
+    data.splice(index, 1)
         
-
-
+    res.send(contact)
+    
 })
